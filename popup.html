@@ -7,6 +7,10 @@
       width: 300px;
       padding: 10px;
       font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
     }
     #tabList {
       margin-bottom: 20px;
@@ -19,13 +23,29 @@
       padding: 5px 0;
     }
     button {
-      padding: 8px 15px;
       cursor: pointer;
       margin-bottom: 10px;
+    }
+    .small-button {
+      padding: 4px 8px;
+      font-size: 12px;
+    }
+    .small-input {
+      padding: 4px;
+      font-size: 12px;
+      width: 60px;
+      margin-bottom: 10px; /* Add margin to create space */
     }
     label {
       display: block;
       margin: 10px 0 5px;
+      font-size: 12px;
+    }
+    #settings {
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
     }
   </style>
 </head>
@@ -37,14 +57,13 @@
     <div id="tabs"></div>
   </div>
 
-  <button id="cleanupButton">Manual Cleanup</button>
-  <button id="clearStorageButton">Clear Storage</button>
+  <button id="cleanupButton" class="small-button">Manual Cleanup</button>
+  <button id="clearStorageButton" class="small-button">Clear Storage</button>
 
   <div id="settings">
-    <h4>Settings</h4>
     <label for="maxTabs">Max Tabs</label>
-    <input type="number" id="maxTabs" min="1" value="20">
-    <button id="saveSettings">Save Settings</button>
+    <input type="number" id="maxTabs" min="1" value="20" class="small-input">
+    <button id="saveSettings" class="small-button">Save Settings</button>
   </div>
 
   <script src="popup.js"></script>
