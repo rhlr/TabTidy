@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
   const tabListElement = document.getElementById('tabs');
   const cleanupButton = document.getElementById('cleanupButton');
   const maxTabsInput = document.getElementById('maxTabs');
@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function() {
   loadSettings();
 
   // Display the list of tracked tabs
-  chrome.storage.local.get(['tabtidy'], function(result) {
+  chrome.storage.local.get(['tabtidy'], function (result) {
     if (result.tabtidy) {
       const cache = new Map(result.tabtidy);  // Initialize cache here
       tabListElement.innerHTML = '';
@@ -29,25 +29,25 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // Handle manual cleanup
-  cleanupButton.addEventListener('click', function() {
+  cleanupButton.addEventListener('click', function () {
     manualCleanup();
   });
 
   // Handle settings save
-  saveSettingsButton.addEventListener('click', function() {
+  saveSettingsButton.addEventListener('click', function () {
     const maxTabs = parseInt(maxTabsInput.value, 10);
     const autoCleanup = autoCleanupCheckbox.checked;
     saveSettings(maxTabs, autoCleanup);
   });
 
   // Handle storage clear
-  clearStorageButton.addEventListener('click', function() {
+  clearStorageButton.addEventListener('click', function () {
     clearStorage();
   });
 
   // Function to manually trigger the tab cleanup process
   function manualCleanup() {
-    chrome.storage.local.get(['tabtidy'], function(result) {
+    chrome.storage.local.get(['tabtidy'], function (result) {
       const cache = new Map(result.tabtidy);  // Initialize cache here
       const maxTabs = parseInt(maxTabsInput.value, 10);
       while (cache.size > maxTabs) {
@@ -63,7 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Function to load settings from storage
   function loadSettings() {
-    chrome.storage.local.get(['maxTabs', 'autoCleanup'], function(result) {
+    chrome.storage.local.get(['maxTabs', 'autoCleanup'], function (result) {
       if (result.maxTabs) {
         maxTabsInput.value = result.maxTabs;
       }
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
     chrome.storage.local.set({
       maxTabs: maxTabs,
       autoCleanup: autoCleanup
-    }, function() {
+    }, function () {
       alert('Settings saved.');
     });
   }
@@ -93,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Function to clear all stored data, including settings
   function clearStorage() {
-    chrome.storage.local.remove(['tabtidy', 'maxTabs', 'autoCleanup'], function() {
+    chrome.storage.local.remove(['tabtidy', 'maxTabs', 'autoCleanup'], function () {
       alert('All settings and tracked tabs have been cleared.');
       window.location.reload(); // Refresh the popup to update the tab list
     });
