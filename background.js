@@ -1,5 +1,12 @@
-const MAX_TAB_COUNT = 10;  // Customize as needed
 let cache = new Map();
+let MAX_TAB_COUNT = 20; // Default value if not set in storage
+
+// Load maxTabs from storage when the extension starts
+chrome.storage.local.get(['maxTabs'], function(result) {
+  if (result.maxTabs) {
+    MAX_TAB_COUNT = result.maxTabs;
+  }
+});
 
 // Function to close tabs if the limit is exceeded
 function closeOldTabs() {

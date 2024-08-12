@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const tabListElement = document.getElementById('tabs');
   const cleanupButton = document.getElementById('cleanupButton');
   const maxTabsInput = document.getElementById('maxTabs');
-  const enableLRUCheckbox = document.getElementById('enableLRU');
   const saveSettingsButton = document.getElementById('saveSettings');
   const clearStorageButton = document.getElementById('clearStorageButton');
 
@@ -36,8 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Handle settings save
   saveSettingsButton.addEventListener('click', function() {
     const maxTabs = parseInt(maxTabsInput.value, 10);
-    const enableLRU = enableLRUCheckbox.checked;
-    saveSettings(maxTabs, enableLRU);
+    saveSettings(maxTabs);
   });
 
   // Handle storage clear
@@ -48,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Function to manually trigger the tab cleanup process
   function manualCleanup() {
     chrome.storage.local.get(['tabtidy'], function(result) {
-      const cache = new Map(result.tabtidy);
+      const cache = new Map(result.tabtidy);  // Initialize cache here
       const maxTabs = parseInt(maxTabsInput.value, 10);
       while (cache.size > maxTabs) {
         const oldestTabId = cache.keys().next().value;
@@ -63,21 +61,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Function to load settings from storage
   function loadSettings() {
-    chrome.storage.local.get(['maxTabs', 'enableLRU'], function(result) {
+    chrome.storage.local.get(['maxTabs'], function(result) {
       if (result.maxTabs) {
         maxTabsInput.value = result.maxTabs;
-      }
-      if (result.enableLRU !== undefined) {
-        enableLRUCheckbox.checked = result.enableLRU;
       }
     });
   }
 
   // Function to save settings to storage
-  function saveSettings(maxTabs, enableLRU) {
+  function saveSettings(maxTabs) {
     chrome.storage.local.set({
       maxTabs: maxTabs,
-      enableLRU: enableLRU
     }, function() {
       alert('Settings saved.');
     });
