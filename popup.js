@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Display the list of tracked tabs
   chrome.storage.local.get(['tabtidy'], function(result) {
     if (result.tabtidy) {
-      const cache = new Map(result.tabtidy);
+      const cache = new Map(result.tabtidy);  // Initialize cache here
       tabListElement.innerHTML = '';
       cache.forEach((data, tabId) => {
         const tabItem = document.createElement('div');
@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
         chrome.tabs.remove(parseInt(oldestTabId));
         cache.delete(oldestTabId);
       }
-      saveCacheToStorage();
+      saveCacheToStorage(cache);
       alert('Manual cleanup completed.');
       window.location.reload(); // Refresh the popup to update the tab list
     });
@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Function to save the cache
-  function saveCacheToStorage() {
+  function saveCacheToStorage(cache) {
     const cacheArray = Array.from(cache.entries());
     chrome.storage.local.set({ tabtidy: cacheArray });
   }
