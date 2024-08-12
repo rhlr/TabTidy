@@ -69,6 +69,8 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       if (result.autoCleanup !== undefined) {
         autoCleanupCheckbox.checked = result.autoCleanup;
+      } else {
+        autoCleanupCheckbox.checked = true; // Default to true
       }
     });
   }
