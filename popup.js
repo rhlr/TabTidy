@@ -91,10 +91,10 @@ document.addEventListener('DOMContentLoaded', function() {
     chrome.storage.local.set({ tabtidy: cacheArray });
   }
 
-  // Function to clear the tabtidy storage
+  // Function to clear all stored data, including settings
   function clearStorage() {
-    chrome.storage.local.remove('tabtidy', function() {
-      alert('Storage cleared.');
+    chrome.storage.local.remove(['tabtidy', 'maxTabs', 'autoCleanup'], function() {
+      alert('All settings and tracked tabs have been cleared.');
       window.location.reload(); // Refresh the popup to update the tab list
     });
   }

@@ -1,5 +1,19 @@
 let cache = new Map();
 let MAX_TAB_COUNT = 10; // Default value if not set in storage
+const RETRY_LIMIT = 3; // Maximum number of retry attempts
+const RETRY_DELAY = 1000; // Delay between retries in milliseconds (e.g., 1 second)
+
+// Function to close a tab with retry logic
+function closeTabWithRetry(tabId, retries = 0) {
+  chrome.tabs.remove(tabId).catch(error => {
+    if (retries < RETRY_LIMIT) {
+      console.warn(`Failed to close tab ${tabId}, retrying... (${retries + 1}/${RETRY_LIMIT})`);
+      setTimeout(() => closeTabWithRetry(tabId, retries + 1), RETRY_DELAY);
+    } else {
+      console.error(`Failed to close tab ${tabId} after ${RETRY_LIMIT} attempts:`, error);
+    }
+  });
+}
 
 // Function to close tabs if the limit is exceeded
 function closeOldTabs() {
@@ -14,7 +28,7 @@ function closeOldTabs() {
 
     while (cache.size > maxTabCount) {
       const oldestTabId = cache.keys().next().value;
-      chrome.tabs.remove(parseInt(oldestTabId));
+      closeTabWithRetry(parseInt(oldestTabId)); // Use retry logic when closing the tab
       cache.delete(oldestTabId);
     }
     saveCacheToStorage();
