@@ -1,15 +1,21 @@
 let cache = new Map();
 let MAX_TAB_COUNT = 20; // Default value if not set in storage
+let autoCleanupEnabled = true; // Default to true
 
-// Load maxTabs from storage when the extension starts
-chrome.storage.local.get(['maxTabs'], function(result) {
+// Load maxTabs and autoCleanup from storage when the extension starts
+chrome.storage.local.get(['maxTabs', 'autoCleanup'], function(result) {
   if (result.maxTabs) {
     MAX_TAB_COUNT = result.maxTabs;
+  }
+  if (result.autoCleanup !== undefined) {
+    autoCleanupEnabled = result.autoCleanup;
   }
 });
 
 // Function to close tabs if the limit is exceeded
 function closeOldTabs() {
+  if (!autoCleanupEnabled) return; // Exit if auto cleanup is disabled
+
   while (cache.size > MAX_TAB_COUNT) {
     const oldestTabId = cache.keys().next().value;
     chrome.tabs.remove(parseInt(oldestTabId));

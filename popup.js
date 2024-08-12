@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const tabListElement = document.getElementById('tabs');
   const cleanupButton = document.getElementById('cleanupButton');
   const maxTabsInput = document.getElementById('maxTabs');
+  const autoCleanupCheckbox = document.getElementById('autoCleanup');
   const saveSettingsButton = document.getElementById('saveSettings');
   const clearStorageButton = document.getElementById('clearStorageButton');
 
@@ -35,7 +36,8 @@ document.addEventListener('DOMContentLoaded', function() {
   // Handle settings save
   saveSettingsButton.addEventListener('click', function() {
     const maxTabs = parseInt(maxTabsInput.value, 10);
-    saveSettings(maxTabs);
+    const autoCleanup = autoCleanupCheckbox.checked;
+    saveSettings(maxTabs, autoCleanup);
   });
 
   // Handle storage clear
@@ -61,17 +63,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Function to load settings from storage
   function loadSettings() {
-    chrome.storage.local.get(['maxTabs'], function(result) {
+    chrome.storage.local.get(['maxTabs', 'autoCleanup'], function(result) {
       if (result.maxTabs) {
         maxTabsInput.value = result.maxTabs;
+      }
+      if (result.autoCleanup !== undefined) {
+        autoCleanupCheckbox.checked = result.autoCleanup;
       }
     });
   }
 
   // Function to save settings to storage
-  function saveSettings(maxTabs) {
+  function saveSettings(maxTabs, autoCleanup) {
     chrome.storage.local.set({
       maxTabs: maxTabs,
+      autoCleanup: autoCleanup
     }, function() {
       alert('Settings saved.');
     });
