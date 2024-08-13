@@ -3,6 +3,23 @@ let MAX_TAB_COUNT = 10; // Default value if not set in storage
 const RETRY_LIMIT = 3; // Maximum number of retry attempts
 const RETRY_DELAY = 1000; // Delay between retries in milliseconds (e.g., 1 second)
 
+// Check if it's the first time the extension is loaded
+chrome.runtime.onInstalled.addListener(function (details) {
+  if (details.reason === 'install') {
+    initializeCacheWithAllTabs();
+  }
+});
+
+// Function to initialize the cache with all currently open tabs
+function initializeCacheWithAllTabs() {
+  chrome.tabs.query({}, function (tabs) {
+    tabs.forEach(tab => {
+      updateCache(tab);
+    });
+    saveCacheToStorage();
+  });
+}
+
 // Function to close a tab with retry logic
 function closeTabWithRetry(tabId, retries = 0) {
   // First, check if the tab still exists
@@ -62,9 +79,9 @@ function updateCache(tab) {
 
   // Add the tab to the end (most recently used)
   cache.set(tab.id, { title: title, lastInteracted: timestamp });
-
   // Perform cleanup if needed
   closeOldTabs();
+  saveCacheToStorage();
 }
 
 // Function to handle manual tab closures and remove them from the cache
@@ -102,17 +119,8 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 
 chrome.tabs.onActivated.addListener(function (activeInfo) {
   chrome.tabs.get(activeInfo.tabId, function (tab) {
+    console.log(tab.title)
     updateCache(tab);
-  });
-});
-
-// Listen for when the window focus changes
-chrome.windows.onFocusChanged.addListener(function (windowId) {
-  if (windowId === chrome.windows.WINDOW_ID_NONE) return;
-  chrome.tabs.query({ active: true, windowId: windowId }, function (tabs) {
-    if (tabs.length > 0) {
-      updateCache(tabs[0]);
-    }
   });
 });
 

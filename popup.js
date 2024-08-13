@@ -1,101 +1,104 @@
-document.addEventListener('DOMContentLoaded', function () {
-  const tabListElement = document.getElementById('tabs');
-  const cleanupButton = document.getElementById('cleanupButton');
-  const maxTabsInput = document.getElementById('maxTabs');
-  const autoCleanupCheckbox = document.getElementById('autoCleanup');
-  const saveSettingsButton = document.getElementById('saveSettings');
-  const clearStorageButton = document.getElementById('clearStorageButton');
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', function () {
+    console.log('Popup loaded');
+    const tabListElement = document.getElementById('tabs');
+    const cleanupButton = document.getElementById('cleanupButton');
+    const maxTabsInput = document.getElementById('maxTabs');
+    const autoCleanupCheckbox = document.getElementById('autoCleanup');
+    const saveSettingsButton = document.getElementById('saveSettings');
+    const clearStorageButton = document.getElementById('clearStorageButton');
 
-  // Load the cache and settings from local storage
-  loadSettings();
-
-  // Display the list of tracked tabs
-  chrome.storage.local.get(['tabtidy'], function (result) {
-    if (result.tabtidy) {
-      const cache = new Map(result.tabtidy);  // Initialize cache here
-      tabListElement.innerHTML = '';
-      cache.forEach((data, tabId) => {
-        const tabItem = document.createElement('div');
-        tabItem.className = 'tab-item';
-        tabItem.innerHTML = `
+    // Load the cache and settings from local storage
+    loadSettings();
+    // Display the list of tracked tabs
+    chrome.storage.local.get(['tabtidy'], function (result) {
+      console.log('###', result.tabtidy);
+      if (result.tabtidy) {
+        const cache = new Map(result.tabtidy);  // Initialize cache here
+        tabListElement.innerHTML = '';
+        cache.forEach((data, tabId) => {
+          const tabItem = document.createElement('div');
+          tabItem.className = 'tab-item';
+          tabItem.innerHTML = `
           <span>${data.title}</span>
           <span>Last: ${new Date(data.lastInteracted).toLocaleString()}</span>
         `;
-        tabListElement.appendChild(tabItem);
+          tabListElement.appendChild(tabItem);
+        });
+      } else {
+        tabListElement.innerHTML = '<p>No tabs are currently tracked.</p>';
+      }
+    });
+
+    // Handle manual cleanup
+    cleanupButton.addEventListener('click', function () {
+      manualCleanup();
+    });
+
+    // Handle settings save
+    saveSettingsButton.addEventListener('click', function () {
+      const maxTabs = parseInt(maxTabsInput.value, 10);
+      const autoCleanup = autoCleanupCheckbox.checked;
+      saveSettings(maxTabs, autoCleanup);
+    });
+
+    // Handle storage clear
+    clearStorageButton.addEventListener('click', function () {
+      clearStorage();
+    });
+
+    // Function to manually trigger the tab cleanup process
+    function manualCleanup() {
+      chrome.storage.local.get(['tabtidy'], function (result) {
+        const cache = new Map(result.tabtidy);  // Initialize cache here
+        const maxTabs = parseInt(maxTabsInput.value, 10);
+        while (cache.size > maxTabs) {
+          const oldestTabId = cache.keys().next().value;
+          chrome.tabs.remove(parseInt(oldestTabId));
+          cache.delete(oldestTabId);
+        }
+        saveCacheToStorage(cache);
+        alert('Manual cleanup completed.');
+        window.location.reload(); // Refresh the popup to update the tab list
       });
-    } else {
-      tabListElement.innerHTML = '<p>No tabs are currently tracked.</p>';
+    }
+
+    // Function to load settings from storage
+    function loadSettings() {
+      chrome.storage.local.get(['maxTabs', 'autoCleanup'], function (result) {
+        if (result.maxTabs) {
+          maxTabsInput.value = result.maxTabs;
+        }
+        if (result.autoCleanup !== undefined) {
+          autoCleanupCheckbox.checked = result.autoCleanup;
+        } else {
+          autoCleanupCheckbox.checked = true; // Default to true
+        }
+      });
+    }
+
+    // Function to save settings to storage
+    function saveSettings(maxTabs, autoCleanup) {
+      chrome.storage.local.set({
+        maxTabs: maxTabs,
+        autoCleanup: autoCleanup
+      }, function () {
+        alert('Settings saved.');
+      });
+    }
+
+    // Function to save the cache
+    function saveCacheToStorage(cache) {
+      const cacheArray = Array.from(cache.entries());
+      chrome.storage.local.set({ tabtidy: cacheArray });
+    }
+
+    // Function to clear all stored data, including settings
+    function clearStorage() {
+      chrome.storage.local.remove(['tabtidy', 'maxTabs', 'autoCleanup'], function () {
+        alert('All settings and tracked tabs have been cleared.');
+        window.location.reload(); // Refresh the popup to update the tab list
+      });
     }
   });
-
-  // Handle manual cleanup
-  cleanupButton.addEventListener('click', function () {
-    manualCleanup();
-  });
-
-  // Handle settings save
-  saveSettingsButton.addEventListener('click', function () {
-    const maxTabs = parseInt(maxTabsInput.value, 10);
-    const autoCleanup = autoCleanupCheckbox.checked;
-    saveSettings(maxTabs, autoCleanup);
-  });
-
-  // Handle storage clear
-  clearStorageButton.addEventListener('click', function () {
-    clearStorage();
-  });
-
-  // Function to manually trigger the tab cleanup process
-  function manualCleanup() {
-    chrome.storage.local.get(['tabtidy'], function (result) {
-      const cache = new Map(result.tabtidy);  // Initialize cache here
-      const maxTabs = parseInt(maxTabsInput.value, 10);
-      while (cache.size > maxTabs) {
-        const oldestTabId = cache.keys().next().value;
-        chrome.tabs.remove(parseInt(oldestTabId));
-        cache.delete(oldestTabId);
-      }
-      saveCacheToStorage(cache);
-      alert('Manual cleanup completed.');
-      window.location.reload(); // Refresh the popup to update the tab list
-    });
-  }
-
-  // Function to load settings from storage
-  function loadSettings() {
-    chrome.storage.local.get(['maxTabs', 'autoCleanup'], function (result) {
-      if (result.maxTabs) {
-        maxTabsInput.value = result.maxTabs;
-      }
-      if (result.autoCleanup !== undefined) {
-        autoCleanupCheckbox.checked = result.autoCleanup;
-      } else {
-        autoCleanupCheckbox.checked = true; // Default to true
-      }
-    });
-  }
-
-  // Function to save settings to storage
-  function saveSettings(maxTabs, autoCleanup) {
-    chrome.storage.local.set({
-      maxTabs: maxTabs,
-      autoCleanup: autoCleanup
-    }, function () {
-      alert('Settings saved.');
-    });
-  }
-
-  // Function to save the cache
-  function saveCacheToStorage(cache) {
-    const cacheArray = Array.from(cache.entries());
-    chrome.storage.local.set({ tabtidy: cacheArray });
-  }
-
-  // Function to clear all stored data, including settings
-  function clearStorage() {
-    chrome.storage.local.remove(['tabtidy', 'maxTabs', 'autoCleanup'], function () {
-      alert('All settings and tracked tabs have been cleared.');
-      window.location.reload(); // Refresh the popup to update the tab list
-    });
-  }
-});
+}
