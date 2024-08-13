@@ -1,6 +1,5 @@
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', function () {
-    console.log('Popup loaded');
     const tabListElement = document.getElementById('tabs');
     const cleanupButton = document.getElementById('cleanupButton');
     const maxTabsInput = document.getElementById('maxTabs');
@@ -12,7 +11,6 @@ if (document.readyState === 'loading') {
     loadSettings();
     // Display the list of tracked tabs
     chrome.storage.local.get(['tabtidy'], function (result) {
-      console.log('###', result.tabtidy);
       if (result.tabtidy) {
         const cache = new Map(result.tabtidy);  // Initialize cache here
         tabListElement.innerHTML = '';
