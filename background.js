@@ -1,5 +1,5 @@
 let cache = new Map();
-let MAX_TAB_COUNT = 20; // Default value if not set in storage
+let MAX_TAB_COUNT = 10; // Default value if not set in storage
 const RETRY_LIMIT = 3; // Maximum number of retry attempts
 const RETRY_DELAY = 1000; // Delay between retries in milliseconds (e.g., 1 second)
 
@@ -103,6 +103,16 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 chrome.tabs.onActivated.addListener(function (activeInfo) {
   chrome.tabs.get(activeInfo.tabId, function (tab) {
     updateCache(tab);
+  });
+});
+
+// Listen for when the window focus changes
+chrome.windows.onFocusChanged.addListener(function (windowId) {
+  if (windowId === chrome.windows.WINDOW_ID_NONE) return;
+  chrome.tabs.query({ active: true, windowId: windowId }, function (tabs) {
+    if (tabs.length > 0) {
+      updateCache(tabs[0]);
+    }
   });
 });
 
